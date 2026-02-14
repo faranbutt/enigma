@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Local Test Suite for GNN-DDI Competition
+Local Test Suite for ENIGMA Competition
 =========================================
 
 This script runs comprehensive local tests to verify all modules work correctly
@@ -686,14 +686,14 @@ def print_summary():
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run local tests for GNN-DDI")
+    parser = argparse.ArgumentParser(description="Run local tests for ENIGMA")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     parser.add_argument("--test", "-t", type=str, help="Run specific test")
     
     args = parser.parse_args()
     
     print("\n" + "=" * 60)
-    print("  GNN-DDI LOCAL TEST SUITE")
+    print("  ENIGMA LOCAL TEST SUITE")
     print("=" * 60)
     
     tests = {

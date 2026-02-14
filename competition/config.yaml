@@ -1,13 +1,13 @@
 # ============================================================
-# GNN Molecular Graph Classification Challenge – Configuration
+# ENIGMA — Encrypted Neural Inference on Graphs for Molecular Analysis
 # ============================================================
 # This file is the single source of truth for competition settings.
 # CI workflows, evaluate.py, validate_submission.py, and
 # render_leaderboard.py all read from here.
 
 competition:
-  name: "GNN Molecular Graph Classification Challenge"
-  short_name: "gnn-molbace"
+  name: "ENIGMA — Encrypted Neural Inference on Graphs for Molecular Analysis"
+  short_name: "enigma"
   description: >
     Predict BACE-1 enzyme inhibition using Graph Neural Networks
     on the OGB MolBACE dataset (scaffold split).
@@ -60,7 +60,7 @@ labels:
   # Primary: inject via GitHub Secret (base64-encoded CSV)
   secret_name: "TEST_LABELS_CSV"
   # Fallback: clone private repo
-  private_repo: "muuki2/gnn-ddi-private"
+  private_repo: "muuki2/enigma-private"
   private_repo_token_secret: "PRIVATE_REPO_TOKEN"
 
 leaderboard:

@@ -28,7 +28,7 @@ References:
   Journal of Chemical Information and Modeling (2019)
   https://pubs.acs.org/doi/10.1021/acs.jcim.9b00237
 
-Author: GNN-DDI Competition
+Author: ENIGMA Competition
 License: MIT
 """
 

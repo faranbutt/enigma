@@ -10,10 +10,10 @@ The evaluation system pulls validation and test labels from a **private GitHub r
 
 ### 1. Create Private Repository
 
-Create a new **private** repository named `gnn-ddi-private` with the following structure:
+Create a new **private** repository named `enigma-private` with the following structure:
 
 ```
-gnn-ddi-private/
+enigma-private/
 ├── test_labels.csv      # Ground truth for test set
 ├── valid_labels.csv     # Ground truth for validation set
 └── README.md            # Documentation
@@ -73,7 +73,7 @@ print(f"Valid labels: {len(valid_df)} entries")
 
 1. Go to GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
 2. Click "Generate new token (classic)"
-3. Give it a descriptive name: `gnn-ddi-evaluation`
+3. Give it a descriptive name: `enigma-evaluation`
 4. Set expiration (recommend: 90 days or no expiration for long-running competitions)
 5. Select scopes:
    - `repo` (Full control of private repositories)
@@ -82,7 +82,7 @@ print(f"Valid labels: {len(valid_df)} entries")
 
 ### 5. Add Token to Main Repository Secrets
 
-1. Go to the main `gnn-ddi` repository → Settings → Secrets and variables → Actions
+1. Go to the main `enigma` repository → Settings → Secrets and variables → Actions
 2. Click "New repository secret"
 3. Name: `PRIVATE_REPO_TOKEN`
 4. Value: Paste the PAT you created
@@ -112,7 +112,7 @@ The GitHub Actions workflow will now:
 - Ensure the PAT has `repo` scope
 
 ### "Repository not found"
-- Verify the private repository name is exactly `gnn-ddi-private`
+- Verify the private repository name is exactly `enigma-private`
 - Check the repository owner matches the URL in the workflow
 - Ensure the PAT has access to the repository
 

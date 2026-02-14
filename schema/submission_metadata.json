@@ -1,6 +1,6 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "GNN-DDI Competition Submission Metadata",
+    "title": "ENIGMA Competition Submission Metadata",
     "description": "Schema for submission metadata in the GNN Mini-Competition on Molecular Graphs",
     "type": "object",
     "required": ["team_name", "model_name", "submission_date"],

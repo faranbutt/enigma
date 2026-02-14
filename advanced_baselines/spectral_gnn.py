@@ -45,7 +45,7 @@ References:
 - Li et al., "Deeper Insights into Graph Convolutional Networks for 
   Semi-Supervised Learning" (AAAI 2018)
 
-Author: GNN-DDI Competition
+Author: ENIGMA Competition
 License: MIT
 """
 

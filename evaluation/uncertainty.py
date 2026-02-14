@@ -50,7 +50,7 @@ References:
 - Angelopoulos & Bates, "A Gentle Introduction to Conformal Prediction 
   and Distribution-Free Uncertainty Quantification" (2022)
 
-Author: GNN-DDI Competition
+Author: ENIGMA Competition
 License: MIT
 """
 

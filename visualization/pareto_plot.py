@@ -33,7 +33,7 @@ Hypervolume Indicator:
 Usage:
     python visualization/pareto_plot.py
 
-Author: GNN-DDI Competition
+Author: ENIGMA Competition
 License: MIT
 """
 

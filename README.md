@@ -1,17 +1,24 @@
-# GNN Molecular Graph Classification Challenge
+<div align="center">
 
-> **Predict BACE-1 enzyme inhibition using Graph Neural Networks**
+# ENIGMA
 
-[![Leaderboard](https://img.shields.io/badge/Leaderboard-View-blue)](leaderboard.md)
+### **E**ncrypted **N**eural **I**nference on **G**raphs for **M**olecular **A**nalysis
+
+*A secure, Kaggle-style GNN competition for molecular property prediction*
+
+[![Leaderboard](https://img.shields.io/badge/Leaderboard-Live-blue)](leaderboard.md)
 [![Dataset](https://img.shields.io/badge/Dataset-OGB_MolBACE-green)](https://ogb.stanford.edu/docs/graphprop/#ogbg-mol)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Evaluation](https://img.shields.io/badge/Evaluation-Automated-orange)](.github/workflows/evaluate.yml)
+[![CI](https://img.shields.io/badge/CI-Automated_Evaluation-orange)](.github/workflows/evaluate.yml)
+[![Encryption](https://img.shields.io/badge/Submissions-RSA--2048_Encrypted-red)](encryption/)
+
+</div>
 
 ---
 
 ## Overview
 
-Welcome to the **GNN Molecular Graph Classification Challenge** — a Kaggle-style competition designed to benchmark Graph Neural Network architectures on molecular property prediction.
+**ENIGMA** is a competitive benchmarking platform for Graph Neural Networks on molecular graph classification. Participants build GNN models to predict BACE-1 enzyme inhibition — a target relevant to Alzheimer's disease drug discovery — while all submissions are protected by RSA-2048 encryption.
 
 ### The Task
 
@@ -19,22 +26,28 @@ Given a molecular graph $G = (V, E)$ where:
 - **Nodes** $V$ represent atoms with features $\mathbf{x}_v \in \mathbb{R}^d$ encoding atomic properties
 - **Edges** $E$ represent chemical bonds with features encoding bond types
 
-Your goal is to learn a graph-level representation and predict a **binary label** $y \in \{0, 1\}$ indicating whether the molecule is an active inhibitor of BACE-1 (Beta-secretase 1), an enzyme associated with Alzheimer's disease.
+Learn a graph-level representation and predict a **binary label** $y \in \{0, 1\}$ indicating whether the molecule is an active inhibitor of BACE-1 (Beta-secretase 1).
+
+### Prize
+
+> **Top performers** will be invited to join a high-level research project aiming for publication at **NeurIPS 2026**.
 
 ---
 
 ## Table of Contents
 
 1. [Dataset](#dataset)
-2. [Evaluation Metrics](#evaluation-metrics)
-3. [Getting Started](#getting-started)
-4. [Baseline Architectures](#baseline-gnn-architectures)
-5. [Advanced Architectures](#advanced-gnn-architectures)
+2. [Graph Specification](#graph-specification-adjacency-matrix-a--node-features-x)
+3. [Evaluation Metric](#evaluation-metric)
+4. [Security Architecture](#security-architecture)
+5. [Getting Started](#getting-started)
 6. [Submission Process](#submission-process)
-7. [Evaluation Dimensions](#evaluation-dimensions)
-8. [Repository Structure](#repository-structure)
-9. [Rules](#rules)
-10. [References](#references-and-citations)
+7. [Baseline Architectures](#baseline-gnn-architectures)
+8. [Advanced Architectures](#advanced-gnn-architectures)
+9. [Evaluation Dimensions](#evaluation-dimensions)
+10. [Repository Structure](#repository-structure)
+11. [Rules](#rules)
+12. [References](#references-and-citations)
 
 ---
 
@@ -42,106 +55,122 @@ Your goal is to learn a graph-level representation and predict a **binary label*
 
 We use the **OGB MolBACE** dataset from the [Open Graph Benchmark](https://ogb.stanford.edu/):
 
-| Split | Molecules | Description |
-|-------|-----------|-------------|
-| Train | 1,210 | For training your model |
-| Valid | 151 | For local validation and hyperparameter tuning |
-| Test | 152 | For final evaluation (**labels hidden**) |
+| Property | Value |
+|----------|-------|
+| **Source** | [OGB MolBACE](https://ogb.stanford.edu/docs/graphprop/#ogbg-mol) |
+| **Task** | Binary classification (BACE-1 inhibitor: yes/no) |
+| **Split** | Scaffold-based (prevents structural leakage) |
+| **Class balance** | ~30% positive (imbalanced) |
+
+| Split | Molecules | Labels | Description |
+|-------|-----------|--------|-------------|
+| Train | 1,210 | ✅ Provided | Model training |
+| Valid | 151 | ✅ Provided | Hyperparameter tuning |
+| Test | 152 | 🔒 Hidden | Final evaluation (CI-only) |
 
 ### Molecular Features
 
-Each molecule is represented as a graph with:
-- **Node features**: 9-dimensional vectors $\mathbf{x}_v \in \mathbb{R}^9$ encoding:
-  - Atomic number (type of atom)
-  - Chirality tag
-  - Degree, formal charge, number of H atoms
-  - Hybridization, aromaticity, and ring membership
-- **Edge features**: 3-dimensional vectors encoding bond type, stereochemistry, and conjugation
+Each molecule is a graph with:
+- **Node features**: 9-dimensional vectors $\mathbf{x}_v \in \mathbb{R}^9$ — atomic number, chirality, degree, formal charge, hydrogen count, hybridization, aromaticity, ring membership
+- **Edge features**: 3-dimensional vectors — bond type, stereochemistry, conjugation
 
 ### Scaffold Split
 
-The dataset uses a **scaffold split** based on molecular substructures, ensuring that:
-- Test molecules are **structurally different** from training molecules
-- This simulates real-world drug discovery scenarios
-- Prevents data leakage from similar molecular scaffolds
+The **scaffold split** groups molecules by Bemis-Murcko scaffolds, ensuring structurally different molecules in train/test. This simulates real-world drug discovery where novel molecular scaffolds must be classified.
 
 ### Class Imbalance
 
-The dataset is **imbalanced** with approximately 30% positive class (active inhibitors). This makes the task non-trivial — a naive classifier predicting all zeros would achieve ~70% accuracy but poor F1.
+With ~30% positive class, a naive all-zeros classifier achieves ~70% accuracy but poor F1. Participants are encouraged to use class weighting, focal loss, or oversampling.
 
-### Graph Specification (Adjacency Matrix A & Node Features X)
+---
 
-All molecular graphs are explicitly provided as dense matrices in `data/graphs/`:
+## Graph Specification (Adjacency Matrix A & Node Features X)
+
+Every molecular graph is pre-computed and stored as dense NumPy matrices in `data/graphs/`:
 
 | File | Molecules | Contents |
 |------|-----------|----------|
-| `data/graphs/train_graphs.npz` | 1,210 | A, X, y for training |
-| `data/graphs/valid_graphs.npz` | 151 | A, X, y for validation |
-| `data/graphs/test_graphs.npz` | 152 | A, X only (labels hidden) |
+| `data/graphs/train_graphs.npz` | 1,210 | $A$, $X$, $y$ |
+| `data/graphs/valid_graphs.npz` | 151 | $A$, $X$, $y$ |
+| `data/graphs/test_graphs.npz` | 152 | $A$, $X$ only (labels hidden) |
 
-For each molecule index `i`:
-- **Adjacency matrix**: $A_i \in \{0,1\}^{n \times n}$ — symmetric, undirected molecular graph
-- **Node feature matrix**: $X_i \in \mathbb{R}^{n \times 9}$ — atom-level features (see above)
+For each molecule $i$:
 
-where $n$ = number of atoms in molecule $i$.
+$$A_i \in \{0,1\}^{n_i \times n_i}, \quad X_i \in \mathbb{R}^{n_i \times 9}$$
+
+where $n_i$ = number of atoms in molecule $i$.
+
+<details>
+<summary><strong>Loading example (Python)</strong></summary>
 
 ```python
 import numpy as np
 
-# Load training graphs
 data = np.load('data/graphs/train_graphs.npz', allow_pickle=False)
+indices = data['indices']   # molecule IDs
 
-# Get molecule indices
-indices = data['indices']  # array of molecule IDs
-
-# Load adjacency matrix A and node features X for molecule 2
-A = data['adj_2']   # shape (n, n), binary adjacency matrix
-X = data['x_2']     # shape (n, 9), node feature matrix
+A = data['adj_2']   # (n, n) binary adjacency matrix
+X = data['x_2']     # (n, 9) node feature matrix
 y = data['y_2']     # label: 0 or 1
 
 print(f"Molecule 2: {A.shape[0]} atoms, label = {y[0]}")
 ```
 
-The same graph data is also accessible via the OGB API (`data.edge_index`, `data.x`). See `data/graphs/README_graphs.md` for full documentation.
+</details>
+
+The same data is available via the OGB API (`data.edge_index`, `data.x`). See `data/graphs/README_graphs.md` for the full format specification.
 
 ---
 
 ## Evaluation Metric
 
-Submissions are evaluated using **Macro F1 Score**, which equally weights performance on both classes:
+**Primary metric: Macro F1 Score** — equally weights performance on both classes:
 
 $$F1_{\text{macro}} = \frac{1}{2}\left(F1_{\text{class}_0} + F1_{\text{class}_1}\right)$$
 
-where for each class $c$:
+where $F1_c = \frac{2 \cdot P_c \cdot R_c}{P_c + R_c}$, $P_c = \frac{TP_c}{TP_c + FP_c}$, $R_c = \frac{TP_c}{TP_c + FN_c}$
 
-$$F1_c = \frac{2 \cdot \text{Precision}_c \cdot \text{Recall}_c}{\text{Precision}_c + \text{Recall}_c}$$
-
-with:
-
-$$\text{Precision}_c = \frac{TP_c}{TP_c + FP_c}, \quad \text{Recall}_c = \frac{TP_c}{TP_c + FN_c}$$
-
-**Why Macro F1?**
-- Treats both classes equally regardless of sample size
-- Penalizes poor performance on the minority class
-- More challenging than accuracy for imbalanced datasets
-- Standard metric in molecular property prediction benchmarks
+**Why Macro F1?** — Treats both classes equally regardless of sample size. Penalises poor performance on the minority class. Standard in molecular property prediction benchmarks.
 
 ### Secondary Metric: Efficiency Score
 
-We also track computational efficiency to encourage practical solutions:
-
 $$\text{Efficiency} = \frac{F_1^2}{\log_{10}(\text{time}_{ms}) \times \log_{10}(\text{params})}$$
 
-where:
-- $\text{time}_{ms}$ = average inference time per batch (milliseconds)
-- $\text{params}$ = total number of trainable parameters
+Logarithmic scaling ensures diminishing-return hardware gains; squaring F1 heavily rewards prediction quality. The leaderboard shows both metrics.
 
-**Interpretation:**
-- Logarithmic scaling ensures 10x speedup always gives the same benefit
-- Squaring F1 heavily rewards prediction quality
-- Balances accuracy with practical deployment considerations
+---
 
-The leaderboard shows both Macro F1 (primary ranking) and Efficiency (secondary metric).
+## Security Architecture
+
+ENIGMA uses a layered security model to ensure fair, tamper-proof evaluation.
+
+### Submission Encryption (RSA-2048)
+
+```
+┌──────────────┐    public_key.pem    ┌──────────────┐    GitHub Secret    ┌──────────────┐
+│              │  ─────────────────▶  │              │  ─────────────────▶ │              │
+│  Participant │    encrypt.py        │  GitHub PR   │    RSA_PRIVATE_KEY  │   CI Runner  │
+│  predictions │  (RSA-2048, OAEP,   │  (.enc file) │    decrypt.py       │  (plaintext) │
+│  (.csv)      │   SHA-256, chunked) │              │                     │              │
+└──────────────┘                      └──────────────┘                     └──────────────┘
+                                                                                 │
+                                                                          score + rank
+                                                                                 │
+                                                                                 ▼
+                                                                       Public Leaderboard
+```
+
+**How it works:**
+1. **Encrypt** — You run `encryption/encrypt.py` with the public key. Your CSV is split into 190-byte chunks, each encrypted with OAEP/SHA-256 padding. The `.enc` file is unreadable without the private key.
+2. **Submit** — You open a Pull Request containing only the `.enc` file. Other participants cannot see your predictions.
+3. **Decrypt** — GitHub Actions injects the private key from a repository secret, decrypts, scores, and deletes the key — all within an ephemeral CI runner.
+4. **Publish** — Only the final score and rank appear on the public leaderboard.
+
+### Label Security
+
+Test labels are **never** committed to this repository. During CI they are injected via:
+1. **GitHub Secret** `TEST_LABELS_CSV` (base64-encoded CSV) — preferred
+2. **Private repository** `enigma-private` (cloned with `PRIVATE_REPO_TOKEN`) — fallback
 
 ---
 
@@ -150,45 +179,27 @@ The leaderboard shows both Macro F1 (primary ranking) and Efficiency (secondary 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/muuki2/gnn-ddi.git
-cd gnn-ddi
+git clone https://github.com/muuki2/enigma.git
+cd enigma
 ```
 
 ### 2. Set Up Environment
 
 ```bash
-# Create virtual environment
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
 pip install -r starter_code/requirements.txt
 ```
 
-### 3. Run the Baseline Models
+### 3. Run Baselines
 
 ```bash
 cd starter_code
-
-# Run GraphSAGE baseline (default)
-python baseline.py
-
-# Run specific model
-python baseline.py --model graphsage
-python baseline.py --model gcn
-python baseline.py --model gin
-
-# Run all baselines for comparison
-python baseline.py --all
+python baseline.py --all       # run GCN, GIN, GraphSAGE
+python baseline.py --model gcn # or a specific model
 ```
 
-This will:
-- Download the OGB MolBACE dataset automatically
-- Train the selected GNN model for 50 epochs
-- Generate `{model}_submission.csv` in the `submissions/` folder
-- Report validation F1 score
-
-### Baseline Performance
+This downloads OGB MolBACE, trains for 50 epochs, generates `submissions/{model}_submission.csv`, and reports validation F1.
 
 | Model | Validation Macro F1 |
 |-------|---------------------|
@@ -202,22 +213,16 @@ This will:
 from ogb.graphproppred import PygGraphPropPredDataset
 
 dataset = PygGraphPropPredDataset(name='ogbg-molbace')
-split_idx = dataset.get_idx_split()
-
-# Get a sample graph
 graph = dataset[0]
 print(f"Nodes: {graph.num_nodes}, Edges: {graph.num_edges}")
-print(f"Node features shape: {graph.x.shape}")
-print(f"Label: {graph.y.item()}")
+print(f"Node features: {graph.x.shape}, Label: {graph.y.item()}")
 ```
 
 ---
 
 ## Submission Process
 
-### Step 1: Generate Predictions
-
-Create a CSV file with predictions for all test molecules:
+### Step 1 — Generate Predictions
 
 ```csv
 id,y_pred
@@ -227,99 +232,58 @@ id,y_pred
 ...
 ```
 
-- `id`: Molecule index from `data/public/test.csv`
-- `y_pred`: Your binary prediction (0 or 1)
-  - *Legacy column name* `target` is still accepted but deprecated
+- `id`: molecule index from `data/public/test.csv`
+- `y_pred`: binary prediction (0 or 1). Legacy column name `target` is still accepted.
 
-### Step 2: Encrypt Your Submission
-
-All submissions must be encrypted using the competition's RSA public key. This ensures **submission privacy** — your predictions are unreadable without our private key.
+### Step 2 — Encrypt
 
 ```bash
-# Encrypt your predictions
 python encryption/encrypt.py \
     submissions/inbox/my_team/run_01/predictions.csv \
     encryption/public_key.pem \
     submissions/inbox/my_team/run_01/predictions.enc
 ```
 
-### Step 3: Submit via Pull Request
+### Step 3 — Submit via Pull Request
 
-1. **Fork** this repository
-2. Add your encrypted submission to `submissions/inbox/<your_team>/<run_id>/`:
-   ```
-   submissions/inbox/alice/run_01/predictions.enc    # required (encrypted)
-   submissions/inbox/alice/run_01/metadata.json       # optional
-   ```
-3. Create a **Pull Request** to the main repository:
-   ```bash
-   git add submissions/inbox/my_team/run_01/predictions.enc
-   git commit -m "Submission: My Team Name"
-   git push origin my-branch-name
-   ```
+```bash
+git add submissions/inbox/my_team/run_01/predictions.enc
+git commit -m "Submission: My Team Name"
+git push origin my-branch && gh pr create   # or open PR on GitHub
+```
 
-> **Legacy format** (flat `submissions/your_username.csv`) is still accepted for backward compatibility during the transition period.
+<details>
+<summary><strong>What happens after you submit</strong></summary>
 
-### How the Security System Works
+1. **Decrypt** — CI decrypts your `.enc` using the private key from GitHub Secrets
+2. **Validate** — `competition/validate_submission.py` checks format
+3. **Score** — `competition/evaluate.py` computes Macro F1 against hidden labels
+4. **Comment** — A bot comments on your PR with the score
+5. **Leaderboard** — [Leaderboard](leaderboard/leaderboard.md) and [interactive board](https://muuki2.github.io/enigma/leaderboard.html) are updated automatically
 
-1. **Encryption (Your Side — Public)**: You encrypt your CSV predictions with our RSA public key (`encryption/public_key.pem`). The resulting `.enc` file is completely unreadable without our private key.
-
-2. **Submission (Your Side — Public)**: You submit the encrypted `.enc` file via Pull Request. Even though the file is in the public repository, nobody can read your predictions.
-
-3. **Automated Decryption (CI — Private)**: GitHub Actions decrypts your submission using the private key stored in GitHub Secrets. The private key is never exposed in the repository or logs.
-
-4. **Scoring & Leaderboard Update (Automated)**: The decrypted predictions are compared against hidden test labels, scores are computed, and the leaderboard is updated automatically (2–5 minutes after submission).
-
-### Automated Evaluation
-
-When you open a Pull Request, the CI system automatically:
-
-1. **Decrypts** your encrypted submission (using the private key stored in GitHub Secrets)
-2. **Validates** your submission format (`competition/validate_submission.py`)
-3. **Evaluates** against hidden test labels (`competition/evaluate.py`)
-4. **Comments** on your PR with your Macro F1 score
-5. **Updates** the [leaderboard](leaderboard/leaderboard.md) and [interactive board](https://muuki2.github.io/gnn-ddi/leaderboard.html)
-
-Test labels are **never committed** to the repository — they are injected by CI via GitHub Secrets.
-Private submissions are **never visible** — only final scores and ranks appear on the public leaderboard.
+</details>
 
 ### Optional: Efficiency Metadata
 
-To appear on the leaderboard with efficiency metrics, include a `metadata.json`:
+Include `metadata.json` alongside your submission to appear with efficiency metrics:
 
 ```json
 {
   "team_name": "alice",
   "model_name": "MyGNN",
   "submission_type": "human",
-  "model_architecture": {"type": "GCN", "num_layers": 3, "hidden_dim": 64},
   "efficiency_metrics": {"inference_time_ms": 5.2, "total_params": 45000}
 }
 ```
 
-Use `evaluation/speed_benchmark.py` to measure these values:
-
-```python
-from evaluation.speed_benchmark import ModelProfiler
-
-profiler = ModelProfiler(model)
-metrics = profiler.profile_model(loader, device)
-print(f"Inference time: {metrics.mean_inference_time_ms} ms")
-print(f"Parameters: {metrics.total_params}")
-```
-
-See `schema/submission_metadata.json` for the full schema.
+Use `evaluation/speed_benchmark.py` to measure these values. See `schema/submission_metadata.json` for the full schema.
 
 ### Submission Layout
 
 ```
-submissions/
-└── inbox/
-    └── your_team/
-        └── run_01/
-            ├── predictions.enc        # Required (encrypted predictions)
-            ├── predictions.csv        # DO NOT submit unencrypted (legacy only)
-            └── metadata.json          # Optional (efficiency + model info)
+submissions/inbox/<team>/<run_id>/
+├── predictions.enc    # Required (RSA-encrypted)
+└── metadata.json      # Optional (efficiency + model info)
 ```
 
 ---
@@ -332,7 +296,7 @@ submissions/
 | 🥈 2 | Baseline-DMPNN | 0.6674 | 0.0833 | 53.6K |
 | 🥉 3 | Baseline-GCN | 0.6153 | - | - |
 
-[View Full Leaderboard](leaderboard/leaderboard.md) · [Interactive Leaderboard](https://muuki2.github.io/gnn-ddi/leaderboard.html)
+[Interactive Leaderboard](https://muuki2.github.io/enigma/leaderboard.html)
 
 ---
 
@@ -548,85 +512,38 @@ Higher hypervolume indicates better overall performance.
 ## Repository Structure
 
 ```
-gnn-ddi/
-├── competition/                # 🏗️ Competition infrastructure (template-compliant)
-│   ├── config.yaml             # Single source of truth for settings
-│   ├── evaluate.py             # Main scoring entry-point (used by CI)
+enigma/
+├── competition/                # Competition infrastructure
+│   ├── config.yaml             # Single source of truth for all settings
+│   ├── evaluate.py             # Scoring entry-point (CI)
 │   ├── metrics.py              # Metric computation (Macro-F1, Efficiency)
 │   ├── validate_submission.py  # Submission format validation
-│   └── render_leaderboard.py   # Generate leaderboard.md + docs JS
-├── encryption/                 # 🔐 Submission encryption system
+│   └── render_leaderboard.py   # Leaderboard renderer (Markdown + JS)
+├── encryption/                 # RSA-2048 submission encryption
 │   ├── encrypt.py              # Encrypt predictions (participant-facing)
-│   ├── decrypt.py              # Decrypt submissions (CI only)
-│   └── public_key.pem          # RSA public key (commit to repo)
+│   ├── decrypt.py              # Decrypt submissions (CI-only)
+│   └── public_key.pem          # RSA public key (safe to publish)
 ├── data/
-│   ├── public/                 # 📂 Public data (accessible to participants)
-│   │   ├── train.csv           # Training molecule indices
-│   │   ├── valid.csv           # Validation molecule indices
-│   │   └── test.csv            # Test molecule indices (labels hidden)
-│   ├── graphs/                 # 📐 Explicit graph matrices (A and X)
-│   │   ├── train_graphs.npz    # Adjacency & features for training molecules
-│   │   ├── valid_graphs.npz    # Adjacency & features for validation molecules
-│   │   ├── test_graphs.npz     # Adjacency & features for test molecules
-│   │   └── README_graphs.md    # Format documentation
+│   ├── public/                 # Public data for participants
+│   │   ├── train.csv, valid.csv, test.csv
+│   ├── graphs/                 # Pre-computed A and X matrices (.npz)
+│   │   ├── train_graphs.npz, valid_graphs.npz, test_graphs.npz
+│   │   └── README_graphs.md
 │   ├── mmp_split/              # MMP-OOD activity-cliff split
 │   └── ogb/                    # OGB dataset (auto-downloaded)
-├── submissions/
-│   └── inbox/                  # 📥 Submit here: inbox/<team>/<run_id>/
-│       └── sample/run_01/      #     predictions.enc + metadata.json
-├── leaderboard/
-│   ├── leaderboard.csv         # 📊 Authoritative leaderboard data
-│   └── leaderboard.md          # Auto-generated Markdown (do not edit)
-├── docs/                       # 🌐 GitHub Pages interactive leaderboard
-│   ├── leaderboard.html
-│   ├── leaderboard.css
-│   ├── leaderboard.js
-│   └── PRIVATE_REPO_SETUP.md
-├── starter_code/
-│   ├── baseline.py             # Baseline models (GraphSAGE, GCN, GIN)
-│   └── requirements.txt        # Training dependencies
-├── advanced_baselines/
-│   ├── dmpnn.py                # Directed Message Passing NN
-│   ├── spectral_gnn.py         # Spectral GNN + Laplacian regularization
-│   └── train_advanced.py       # Training driver for advanced models
-├── evaluation/
-│   ├── speed_benchmark.py      # Performance profiling
-│   ├── uncertainty.py          # Uncertainty quantification
-│   ├── adversarial.py          # Adversarial robustness tests
-│   └── mmp_ood.py              # MMP-OOD activity-cliff evaluation
-├── visualization/
-│   └── pareto_plot.py          # Pareto front analysis
-├── scripts/
-│   ├── generate_labels.py      # Label generation utility
-│   ├── generate_mmp_split.py   # MMP-OOD split generator
-│   ├── run_mmp_evaluation.py   # End-to-end MMP evaluation
-│   └── run_local_tests.py      # Local test suite (45 tests)
-├── schema/
-│   └── submission_metadata.json
-├── .github/workflows/
-│   └── evaluate.yml            # CI: validate → score → update leaderboard
-├── scoring_script.py           # Legacy scoring (kept for compatibility)
-├── update_leaderboard.py       # Legacy leaderboard updater
-├── requirements.txt            # CI infrastructure dependencies
-└── README.md
+├── submissions/inbox/          # Submit here: inbox/<team>/<run_id>/
+├── leaderboard/                # Authoritative CSV + auto-generated Markdown
+├── docs/                       # GitHub Pages interactive leaderboard
+├── starter_code/               # Baseline GNNs (GCN, GIN, GraphSAGE)
+├── advanced_baselines/         # D-MPNN + Spectral GNN
+├── evaluation/                 # Speed, uncertainty, adversarial, MMP-OOD
+├── visualization/              # Pareto front analysis
+├── scripts/                    # Label generation, local tests, MMP evaluation
+├── schema/                     # Submission metadata JSON schema
+├── .github/workflows/          # CI: decrypt → validate → score → leaderboard
+├── requirements.txt            # CI dependencies
+└── README.md                   # This file
 ```
-
-### Label Security
-
-Test and validation labels are **never committed** to this repository.  During CI they are injected via:
-1. **GitHub Secret** `TEST_LABELS_CSV` (preferred — base64-encoded CSV), or
-2. **Private repository** `gnn-ddi-private` (fallback — cloned with `PRIVATE_REPO_TOKEN`)
-
-### Submission Privacy
-
-Participant predictions are **encrypted with RSA** before submission. The workflow:
-1. Participants encrypt their CSV with the public key (`encryption/public_key.pem`)
-2. The encrypted `.enc` file is submitted via Pull Request
-3. GitHub Actions decrypts using the private key stored in GitHub Secret `RSA_PRIVATE_KEY`
-4. The private key is never exposed in the repository, logs, or PR comments
-5. Only final scores and ranks appear on the public leaderboard
-
-This ensures fair, tamper-proof evaluation with transparent scoring via automated PR comments.
 
 ---
 
@@ -828,9 +745,14 @@ If you use this challenge or the methods implemented here, please cite the follo
 
 For questions or issues, please open a [GitHub Issue](../../issues).
 
-**Organizer:** Murat Kolic ([@muuki2](https://github.com/muuki2))  
+**Organizer:** Murat Kolic ([@muuki2](https://github.com/muuki2))
+**Affiliation:** [BASIRA Lab](https://basira-lab.com/)
 **Location:** Sarajevo, Bosnia and Herzegovina
 
 ---
 
-*Good luck. May the best GNN win.*
+<div align="center">
+
+*ENIGMA — Encrypted Neural Inference on Graphs for Molecular Analysis*
+
+</div>

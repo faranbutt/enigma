@@ -17,7 +17,7 @@ Usage:
     profiler = ModelProfiler(model, device='cuda')
     metrics = profiler.profile(test_loader)
     
-Author: GNN-DDI Competition
+Author: ENIGMA Competition
 License: MIT
 """
 

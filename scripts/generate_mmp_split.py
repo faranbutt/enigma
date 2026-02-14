@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Generate MMP-OOD Split for GNN-DDI Competition
+Generate MMP-OOD Split for ENIGMA Competition
 ================================================
 
 This script reads the OGB MolBACE dataset, identifies activity-cliff pairs
@@ -40,7 +40,7 @@ from evaluation.mmp_ood import (
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Generate MMP-OOD split for the GNN-DDI competition'
+        description='Generate MMP-OOD split for the ENIGMA competition'
     )
     parser.add_argument(
         '--ogb-root', type=str,

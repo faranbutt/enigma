@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Run MMP-OOD Evaluation for GNN-DDI Competition
+Run MMP-OOD Evaluation for ENIGMA Competition
 ================================================
 
 End-to-end convenience script that:

@@ -148,7 +148,7 @@ def create_labels_package(
     # Create metadata file
     metadata_path = os.path.join(output_dir, 'labels_metadata.txt')
     with open(metadata_path, 'w') as f:
-        f.write("GNN-DDI Competition - Ground Truth Labels\n")
+        f.write("ENIGMA Competition - Ground Truth Labels\n")
         f.write("=" * 50 + "\n\n")
         f.write(f"Generated: {result['metadata']['generated_at']}\n")
         f.write(f"Recipient: {result['metadata']['recipient']}\n")
@@ -173,7 +173,7 @@ def create_labels_package(
     if create_zip:
         recipient_suffix = f"_{recipient_name}" if recipient_name else ""
         date_suffix = datetime.now().strftime("%Y%m%d")
-        zip_name = f"gnn_ddi_labels{recipient_suffix}_{date_suffix}.zip"
+        zip_name = f"enigma_labels{recipient_suffix}_{date_suffix}.zip"
         zip_path = os.path.join(output_dir, zip_name)
         
         print(f"\n📦 Creating ZIP archive: {zip_name}")
@@ -189,7 +189,7 @@ def create_labels_package(
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate ground truth labels for GNN-DDI competition"
+        description="Generate ground truth labels for ENIGMA competition"
     )
     parser.add_argument(
         '--output-dir', '-o',
@@ -229,7 +229,7 @@ def main():
         output_dir = str(script_dir.parent / 'temp_private_data')
     
     print("\n" + "=" * 60)
-    print("  GNN-DDI Label Generator")
+    print("  ENIGMA Label Generator")
     print("=" * 60)
     
     # Generate labels
@@ -268,7 +268,7 @@ def main():
     print("\n" + "=" * 60)
     print("⚠️  IMPORTANT REMINDERS:")
     print("  - test_labels.csv and valid_labels.csv are PRIVATE")
-    print("  - Copy these to your PRIVATE repository (gnn-ddi-private)")
+    print("  - Copy these to your PRIVATE repository (enigma-private)")
     print("  - Do NOT commit these to the public repository")
     print("=" * 60 + "\n")
 

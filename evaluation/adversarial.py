@@ -63,7 +63,7 @@ References:
   An Optimization Perspective" (IJCAI 2019)
 - Jin et al., "Adversarial Attacks and Defenses on Graphs" (2020)
 
-Author: GNN-DDI Competition
+Author: ENIGMA Competition
 License: MIT
 """
 

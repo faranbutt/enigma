@@ -71,7 +71,7 @@ jobs:
             echo "❌ No labels secret and no PRIVATE_REPO_TOKEN — cannot score."
             exit 1
           fi
-          git clone --depth 1 https://${PRIVATE_REPO_TOKEN}@github.com/muuki2/gnn-ddi-private.git private_data
+          git clone --depth 1 https://${PRIVATE_REPO_TOKEN}@github.com/muuki2/enigma-private.git private_data
           cp private_data/test_labels.csv data/test_labels.csv
           rm -rf private_data
           echo "✅ Labels fetched from private repo"
@@ -307,7 +307,7 @@ jobs:
             ---
 
             *Tips: Try different architectures, tune hyperparameters, handle class imbalance.*
-            *See the [interactive leaderboard](https://muuki2.github.io/gnn-ddi/leaderboard.html) for full rankings.* 🚀`;
+            *See the [interactive leaderboard](https://muuki2.github.io/enigma/leaderboard.html) for full rankings.* 🚀`;
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,

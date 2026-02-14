@@ -46,7 +46,7 @@ References:
   with Activity Cliffs" (J. Chem. Inf. Model. 2022) — MoleculeACE benchmark
 - Hu et al., "Open Graph Benchmark" (NeurIPS 2020)
 
-Author: GNN-DDI Competition
+Author: ENIGMA Competition
 License: MIT
 """
 

@@ -5,7 +5,7 @@
 > The rendered Markdown version is at [`leaderboard/leaderboard.md`](leaderboard/leaderboard.md).
 >
 > The interactive version is at [`docs/leaderboard.html`](docs/leaderboard.html)
-> (live at <https://muuki2.github.io/gnn-ddi/leaderboard.html>).
+> (live at <https://muuki2.github.io/enigma/leaderboard.html>).
 >
 > To regenerate after scoring:
 > ```bash
