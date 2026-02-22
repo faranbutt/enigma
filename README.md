@@ -29,20 +29,51 @@ Given a molecular graph $G = (V, E)$ where:
 Learn a graph-level representation and predict a **binary label** $y \in \{0, 1\}$ indicating whether the molecule is an active inhibitor of BACE-1 (Beta-secretase 1).
 ---
 
+## How ENIGMA Differs from the Standard OGB MolBACE Benchmark
+
+ENIGMA is built *on top of* the [OGB MolBACE](https://ogb.stanford.edu/docs/graphprop/#ogbg-mol) dataset, but the competition design departs significantly from the vanilla OGB benchmark. The table below summarises the key differences — **bolded entries** highlight where ENIGMA introduces something new.
+
+| Aspect | OGB MolBACE (Standard) | ENIGMA |
+|--------|------------------------|--------|
+| **Evaluation Metric** | ROC-AUC (single metric) | **Macro F1 (primary) + Efficiency Score + Cliff Accuracy** — a multi-dimensional evaluation that rewards balanced classification, computational frugality, and robustness to activity cliffs |
+| **Submission Security** | Open upload to OGB evaluation server | **RSA-2048 encrypted submissions via GitHub Pull Requests** — predictions are chunked and encrypted with OAEP/SHA-256 padding; only CI runners with the private key can decrypt them |
+| **Scoring Infrastructure** | OGB central evaluation server | **Fully automated GitHub Actions CI pipeline** — decryption → validation → scoring → leaderboard update, all within an ephemeral runner. No central server required |
+| **Data Splits** | Scaffold split only | **Scaffold split + MMP-OOD (Matched Molecular Pair Out-of-Distribution)** — an additional stress-test split where test molecules are drawn from *activity cliff* pairs and training molecules are scaffold-excluded, evaluating true OOD generalisation |
+| **Activity Cliff Evaluation** | Not evaluated | **Pairwise cliff accuracy** — for each activity cliff pair $(A, B)$ where $\text{Tanimoto}(A,B) \geq \tau$ but $y_A \neq y_B$, the model must correctly rank the active molecule above the inactive one |
+| **Test Label Access** | Publicly evaluable via OGB API | **Hidden labels injected at CI time** — test labels are stored in a GitHub Secret (`TEST_LABELS_CSV`) or a private repository, never committed to the public repo |
+| **Submission Attempts** | Unlimited | **One submission per team** — enforced programmatically by `validate_submission.py`. This encourages careful model selection over leaderboard probing |
+| **Graph Data Format** | Implicit via PyG (`edge_index`, `data.x`) | **Explicit dense adjacency matrices $A$ and node-feature matrices $X$** exported as `.npz` files, alongside the standard PyG format |
+| **Efficiency Metric** | Not measured | **$\text{Eff} = F_1^2 \;/\; (\log_{10}(t_{\text{ms}}) \times \log_{10}(p))$** — logarithmic scaling of time and parameters ensures diminishing returns for brute-force scaling; F1 is squared to heavily reward prediction quality |
+| **Robustness Testing** | Not tested | **Adversarial graph perturbations** (random edge flips, gradient-based edge removal, feature noise, feature masking) measured via Attack Success Rate |
+| **Uncertainty Quantification** | Not evaluated | **MC Dropout, Conformal Prediction, Temperature Scaling** — tools provided to measure epistemic uncertainty, calibration error, and prediction-set coverage |
+| **Baseline Suite** | Single GCN baseline | **Six baseline architectures**: GCN, GIN, GraphSAGE (starter), plus D-MPNN and Spectral GNN with Chebyshev convolutions and Laplacian regularisation (advanced) |
+| **Leaderboard** | Static OGB leaderboard | **Interactive HTML/JS leaderboard** with Pareto-front visualisation (F1 vs. Efficiency) auto-generated on every merge |
+
+### Why These Changes Matter
+
+- **Macro F1 over ROC-AUC** — With ~30 % positive class, ROC-AUC can be misleadingly high even when the minority class is poorly predicted. Macro F1 forces balanced performance across both classes.
+- **Encrypted submissions** — In open benchmarks, participants can reverse-engineer test labels by submitting carefully constructed probes. RSA-2048 encryption eliminates this attack vector entirely.
+- **MMP-OOD evaluation** — Standard scaffold splits can still leak structural similarity. Activity-cliff pairs are the hardest cases in drug discovery; evaluating on them reveals whether a model has truly learned molecular SAR (Structure–Activity Relationships).
+- **Efficiency scoring** — Encourages participants to build lightweight, deployable models rather than scaling to impractically large architectures.
+- **One-shot submission** — Mimics real-world drug-discovery decisions where you commit resources to a single model. Prevents overfitting to the test set through repeated submissions.
+
+---
+
 ## Table of Contents
 
-1. [Dataset](#dataset)
-2. [Graph Specification](#graph-specification-adjacency-matrix-a--node-features-x)
-3. [Evaluation Metric](#evaluation-metric)
-4. [Security Architecture](#security-architecture)
-5. [Getting Started](#getting-started)
-6. [Submission Process](#submission-process)
-7. [Baseline Architectures](#baseline-gnn-architectures)
-8. [Advanced Architectures](#advanced-gnn-architectures)
-9. [Evaluation Dimensions](#evaluation-dimensions)
-10. [Repository Structure](#repository-structure)
-11. [Rules](#rules)
-12. [References](#references-and-citations)
+1. [How ENIGMA Differs from Standard OGB MolBACE](#how-enigma-differs-from-the-standard-ogb-molbace-benchmark)
+2. [Dataset](#dataset)
+3. [Graph Specification](#graph-specification-adjacency-matrix-a--node-features-x)
+4. [Evaluation Metric](#evaluation-metric)
+5. [Security Architecture](#security-architecture)
+6. [Getting Started](#getting-started)
+7. [Submission Process](#submission-process)
+8. [Baseline Architectures](#baseline-gnn-architectures)
+9. [Advanced Architectures](#advanced-gnn-architectures)
+10. [Evaluation Dimensions](#evaluation-dimensions)
+11. [Repository Structure](#repository-structure)
+12. [Rules](#rules)
+13. [References](#references-and-citations)
 
 ---
 

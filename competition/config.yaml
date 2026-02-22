@@ -10,7 +10,14 @@ competition:
   short_name: "enigma"
   description: >
     Predict BACE-1 enzyme inhibition using Graph Neural Networks
-    on the OGB MolBACE dataset (scaffold split).
+    on the OGB MolBACE dataset (scaffold split). Unlike the standard
+    OGB MolBACE benchmark, ENIGMA introduces RSA-2048 encrypted
+    submissions, multi-dimensional evaluation (Macro F1, Efficiency
+    Score, and MMP-OOD activity-cliff accuracy), a fully automated
+    GitHub Actions CI scoring pipeline, explicit dense graph matrices
+    (A, X), adversarial robustness testing, uncertainty quantification,
+    and a strict one-submission-per-team rule to prevent leaderboard
+    probing.
   version: "1.0"
   organiser: "BASIRA Lab"
 
