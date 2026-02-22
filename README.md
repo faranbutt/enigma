@@ -27,11 +27,6 @@ Given a molecular graph $G = (V, E)$ where:
 - **Edges** $E$ represent chemical bonds with features encoding bond types
 
 Learn a graph-level representation and predict a **binary label** $y \in \{0, 1\}$ indicating whether the molecule is an active inhibitor of BACE-1 (Beta-secretase 1).
-
-### Prize
-
-> **Top performers** will be invited to join a high-level research project aiming for publication at **NeurIPS 2026**.
-
 ---
 
 ## Table of Contents
