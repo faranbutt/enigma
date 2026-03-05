@@ -1,0 +1,6 @@
+{
+  "team_name": "faranbutt",
+  "model_name": "Ensemble GNN",
+  "submission_type": "human",
+  "efficiency_metrics": {"inference_time_ms": 0.81 , "total_params": 1699146}
+}
